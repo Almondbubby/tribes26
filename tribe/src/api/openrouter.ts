@@ -3,7 +3,7 @@ const OPENROUTER_BASE = 'https://openrouter.ai/api/v1'
 export type OpenRouterModel =
   | 'openai/gpt-4o'
   | 'anthropic/claude-3.5-sonnet'
-  | 'google/gemini-1.5-pro'
+  | 'google/gemini-2.5-pro'
 
 export async function chatCompletion(params: {
   model: OpenRouterModel
