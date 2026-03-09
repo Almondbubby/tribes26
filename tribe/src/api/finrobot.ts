@@ -8,6 +8,7 @@ import { chatCompletion, type OpenRouterModel } from './openrouter'
 import {
   FINROBOT_SYSTEM_PROMPT,
   buildFinRobotPrompt,
+  FINROBOT_INDUSTRY_SYSTEM_PROMPT,
   DOCUMENT_FINROBOT_SYSTEM_PROMPT,
 } from '../prompts'
 
@@ -24,6 +25,21 @@ export async function finrobotAnalysis(params: {
     model,
     systemPrompt: FINROBOT_SYSTEM_PROMPT,
     userPrompt: buildFinRobotPrompt(tickerOrCompany),
+    apiKey,
+  })
+}
+
+export async function finrobotIndustryAnalysis(params: {
+  industryOrMarket: string
+  apiKey: string
+  model?: OpenRouterModel
+}): Promise<string> {
+  const { industryOrMarket, apiKey, model = DEFAULT_MODEL } = params
+
+  return chatCompletion({
+    model,
+    systemPrompt: FINROBOT_INDUSTRY_SYSTEM_PROMPT,
+    userPrompt: `Generate a strategic industry deep dive for the following:\n\n${industryOrMarket}`,
     apiKey,
   })
 }

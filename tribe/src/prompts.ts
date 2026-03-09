@@ -73,7 +73,7 @@ export function buildMarketInsightPrompt(industryOrMarket: string): string {
   return `Generate a strategic deep dive for the following industry or market:\n\n${industryOrMarket}`
 }
 
-// FinRobot-style Market Forecaster prompt (https://github.com/AI4Finance-Foundation/FinRobot)
+// FinRobot-style Stock Forecaster prompt (https://github.com/AI4Finance-Foundation/FinRobot)
 export const FINROBOT_SYSTEM_PROMPT = `You are a Market Analyst AI Agent in the style of FinRobot. Analyze the given company/ticker and provide professional equity research.
 
 Structure your response in markdown with these sections:
@@ -94,6 +94,31 @@ A rough prediction for next week's stock movement (e.g., up 2-3%, down 1-2%, or 
 Synthesize the factors above into a coherent narrative that justifies your outlook.
 
 Be analytical, specific, and grounded. Use markdown formatting (##, -, **) for clarity.`
+
+// FinRobot-style Industry Report prompt (for Market Insights page)
+export const FINROBOT_INDUSTRY_SYSTEM_PROMPT = `You are a Market Analyst AI Agent in the style of FinRobot. Analyze the given industry or market and provide a professional industry deep-dive report. This is an INDUSTRY report, not a stock analysis.
+
+Structure your response in markdown with these sections:
+
+## Executive Summary
+Brief overview of the industry's current state, size, growth trajectory, and key conclusions.
+
+## Market Size & Dynamics
+Current valuation, growth rates, regional breakdown, and structural characteristics of the industry.
+
+## Key Trends & Drivers
+3-5 major forces shaping the industry. Be specific and data-informed.
+
+## Competitive Landscape
+Key players, market structure, barriers to entry, and partnership dynamics.
+
+## Opportunities & Risks
+Growth opportunities and key risks or headwinds to monitor.
+
+## Outlook & Strategic Implications
+Forward-looking view and actionable insights for industry participants or investors.
+
+Be analytical, specific, and grounded. Use markdown formatting (##, -, **) for clarity. Do NOT provide stock picks or ticker predictions—focus on the industry as a whole.`
 
 export function buildFinRobotPrompt(tickerOrCompany: string): string {
   return `Analyze ${tickerOrCompany} as a stock investment. Retrieve and consider relevant company information, recent developments, and market context. Provide your analysis and next-week price movement prediction.`

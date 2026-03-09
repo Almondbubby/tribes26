@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { chatCompletion, type OpenRouterModel } from '../api/openrouter'
-import { finrobotAnalysis } from '../api/finrobot'
+import { finrobotIndustryAnalysis } from '../api/finrobot'
 import { fingptMarketAnalysis } from '../api/fingpt'
 import { MARKET_INSIGHT_SYSTEM_PROMPT, buildMarketInsightPrompt } from '../prompts'
 import '../App.css'
@@ -13,7 +13,7 @@ const OPENROUTER_MODELS = [
 
 const MODELS = [
   ...OPENROUTER_MODELS,
-  { id: 'finrobot' as const, name: 'FinRobot (Market Forecaster)' },
+  { id: 'finrobot' as const, name: 'FinRobot' },
   { id: 'fingpt' as const, name: 'FinGPT' },
 ] as const
 
@@ -43,7 +43,7 @@ export function MarketInsight() {
     try {
       const content =
         model === 'finrobot'
-          ? await finrobotAnalysis({ tickerOrCompany: prompt.trim(), apiKey })
+          ? await finrobotIndustryAnalysis({ industryOrMarket: prompt.trim(), apiKey })
           : model === 'fingpt'
             ? await fingptMarketAnalysis({ industryOrMarket: prompt.trim(), apiKey })
             : await chatCompletion({
@@ -86,11 +86,7 @@ export function MarketInsight() {
         </div>
         <textarea
           className="prompt-input"
-          placeholder={
-            model === 'finrobot'
-              ? 'Enter ticker symbol (e.g., NVDA, AAPL, MSFT)'
-              : 'e.g. Electric vehicle charging infrastructure in Southeast Asia'
-          }
+          placeholder="e.g. Electric vehicle charging infrastructure in Southeast Asia"
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
           rows={3}
@@ -116,11 +112,7 @@ export function MarketInsight() {
       {(isLoading || deepDive) && (
         <section className="output-section">
           <h2>
-            {model === 'finrobot'
-              ? 'Stock Analysis'
-              : model === 'fingpt'
-                ? 'FinGPT Analysis'
-                : 'Industry Deep Dive'}
+            {model === 'fingpt' ? 'FinGPT Analysis' : 'Industry Deep Dive'}
           </h2>
           {isLoading ? (
             <div className="loading-placeholder">
