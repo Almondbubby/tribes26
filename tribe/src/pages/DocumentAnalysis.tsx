@@ -1,13 +1,12 @@
 import { useState, useCallback } from 'react'
-import { chatCompletion, type OpenRouterModel } from '../api/openrouter'
+import { chatCompletion, type ChatModelId } from '../api/chat'
 import { DOCUMENT_ANALYSIS_SYSTEM_PROMPT } from '../prompts'
 import { extractTextFromFile } from '../utils/fileParser'
 import './DocumentAnalysis.css'
 
-const MODELS: { id: OpenRouterModel; name: string }[] = [
-  { id: 'openai/gpt-4o', name: 'GPT-4o' },
-  { id: 'anthropic/claude-3.5-sonnet', name: 'Claude 3.5 Sonnet' },
-  { id: 'google/gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
+const MODELS: { id: ChatModelId; name: string }[] = [
+  { id: 'gpt-4o', name: 'GPT-4o' },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
 ]
 
 const ACCEPT_TYPES = '.pdf,.csv,.txt,.json,.md'
@@ -19,13 +18,14 @@ type FileWithText = {
 
 export function DocumentAnalysis() {
   const [files, setFiles] = useState<FileWithText[]>([])
-  const [model, setModel] = useState<OpenRouterModel>(MODELS[0].id)
+  const [model, setModel] = useState<ChatModelId>(MODELS[0].id)
   const [analysis, setAnalysis] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isDragging, setIsDragging] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+  const openaiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY
 
   const processFiles = useCallback(async (fileList: FileList | null) => {
     if (!fileList?.length) return
@@ -75,8 +75,16 @@ export function DocumentAnalysis() {
   }
 
   const handleAnalyze = async () => {
-    if (!files.length || !apiKey) {
-      setError(apiKey ? 'Add at least one file' : 'Add VITE_OPENROUTER_API_KEY to your .env file')
+    if (!files.length) {
+      setError('Add at least one file')
+      return
+    }
+    if (model === 'gpt-4o' && !openaiKey) {
+      setError('Add VITE_OPENAI_API_KEY to your .env file')
+      return
+    }
+    if (model === 'gemini-2.0-flash' && !geminiKey) {
+      setError('Add VITE_GEMINI_API_KEY to your .env file')
       return
     }
 
@@ -96,7 +104,8 @@ export function DocumentAnalysis() {
         model,
         systemPrompt: DOCUMENT_ANALYSIS_SYSTEM_PROMPT,
         userPrompt: `Analyze the following document(s):\n\n${combinedContent}`,
-        apiKey,
+        openaiKey: openaiKey ?? '',
+        geminiKey: geminiKey ?? '',
       })
       setAnalysis(content)
     } catch (err) {
@@ -119,7 +128,7 @@ export function DocumentAnalysis() {
         <select
           id="doc-model"
           value={model}
-          onChange={(e) => setModel(e.target.value as OpenRouterModel)}
+          onChange={(e) => setModel(e.target.value as ChatModelId)}
           disabled={isLoading}
         >
           {MODELS.map((m) => (

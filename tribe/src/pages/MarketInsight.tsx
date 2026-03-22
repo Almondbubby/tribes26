@@ -1,15 +1,14 @@
 import { useState } from 'react'
-import { chatCompletion, type OpenRouterModel } from '../api/openrouter'
+import { chatCompletion, type ChatModelId } from '../api/chat'
 import { MARKET_INSIGHT_SYSTEM_PROMPT, buildMarketInsightPrompt } from '../prompts'
 import '../App.css'
 
-const MODELS = [
-  { id: 'openai/gpt-4o' as const, name: 'GPT-4o' },
-  { id: 'anthropic/claude-3.5-sonnet' as const, name: 'Claude 3.5 Sonnet' },
-  { id: 'google/gemini-2.5-pro' as const, name: 'Gemini 2.5 Pro' },
-] as const
+const MODELS: { id: ChatModelId; name: string }[] = [
+  { id: 'gpt-4o', name: 'GPT-4o' },
+  { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
+]
 
-export type ModelId = (typeof MODELS)[number]['id']
+export type ModelId = ChatModelId
 
 export function MarketInsight() {
   const [prompt, setPrompt] = useState('')
@@ -18,13 +17,18 @@ export function MarketInsight() {
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const apiKey = import.meta.env.VITE_OPENROUTER_API_KEY
+  const openaiKey = import.meta.env.VITE_OPENAI_API_KEY
+  const geminiKey = import.meta.env.VITE_GEMINI_API_KEY
 
   const handleGenerate = async () => {
     if (!prompt.trim()) return
 
-    if (!apiKey) {
-      setError('Add VITE_OPENROUTER_API_KEY to your .env file')
+    if (model === 'gpt-4o' && !openaiKey) {
+      setError('Add VITE_OPENAI_API_KEY to your .env file')
+      return
+    }
+    if (model === 'gemini-2.0-flash' && !geminiKey) {
+      setError('Add VITE_GEMINI_API_KEY to your .env file')
       return
     }
 
@@ -34,10 +38,11 @@ export function MarketInsight() {
 
     try {
       const content = await chatCompletion({
-        model: model as OpenRouterModel,
+        model,
         systemPrompt: MARKET_INSIGHT_SYSTEM_PROMPT,
         userPrompt: buildMarketInsightPrompt(prompt),
-        apiKey,
+        openaiKey: openaiKey ?? '',
+        geminiKey: geminiKey ?? '',
       })
       setDeepDive(content)
     } catch (err) {

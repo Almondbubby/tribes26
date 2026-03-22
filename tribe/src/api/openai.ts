@@ -1,24 +1,18 @@
-const OPENROUTER_BASE = 'https://openrouter.ai/api/v1'
+const OPENAI_BASE = 'https://api.openai.com/v1'
 
-export type OpenRouterModel =
-  | 'openai/gpt-4o'
-  | 'anthropic/claude-3.5-sonnet'
-  | 'google/gemini-2.5-pro'
-
-export async function chatCompletion(params: {
-  model: OpenRouterModel
+export async function openaiChat(params: {
   systemPrompt: string
   userPrompt: string
   apiKey: string
+  model?: string
 }): Promise<string> {
-  const { model, systemPrompt, userPrompt, apiKey } = params
+  const { systemPrompt, userPrompt, apiKey, model = 'gpt-4o' } = params
 
-  const response = await fetch(`${OPENROUTER_BASE}/chat/completions`, {
+  const response = await fetch(`${OPENAI_BASE}/chat/completions`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${apiKey}`,
-      ...(typeof window !== 'undefined' && { 'HTTP-Referer': window.location.origin }),
     },
     body: JSON.stringify({
       model,
@@ -32,13 +26,13 @@ export async function chatCompletion(params: {
 
   if (!response.ok) {
     const err = await response.json().catch(() => ({}))
-    throw new Error(err.error?.message ?? `OpenRouter error: ${response.status}`)
+    throw new Error(err.error?.message ?? `OpenAI error: ${response.status}`)
   }
 
   const data = await response.json()
   const content = data.choices?.[0]?.message?.content
   if (typeof content !== 'string') {
-    throw new Error('Invalid response from OpenRouter')
+    throw new Error('Invalid response from OpenAI')
   }
   return content
 }
